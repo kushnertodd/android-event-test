@@ -70,41 +70,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// https://www.computerhope.com/htmcolor.htm
-/*val CustomRed = Color(0xFFFF0000)
-val CustomOrange = Color(0xFFFFA500)
-val CustomYellow = Color(0xFFFFFF00)
-val CustomBlue = Color(0xFF0000FF)
-val CustomCyan = Color(0xFF00FFFF)
-val CustomGreen = Color(0xFF008000)*/
-//val pressureLightColor= MaterialTheme.colorScheme.primary
-//val pressureAvgColor=  MaterialTheme.colorScheme.secondary
-//val pressureFirmColor= MaterialTheme.colorScheme.tertiary
-
-/*
-fun pressureColor(end: Float, begin: Float): Color {
-    val avg = (end + begin) / 2
-    return when {
-//        avg < 0.33 -> CustomRed
-//        avg < 0.33 -> CustomRed
-//        avg < 0.66 -> CustomOrange
-        avg < 0.33 -> pressureLightColor
-        avg < 0.33 -> pressureAvgColor
-       c-> pressureFirmColor
-        else -> CustomYellow
-    }
-}
-*/
-
-/*fun durationColor(end: Long, begin: Long): Color {
-    val duration = (end - begin)
-    return when {
-        duration < 333 -> CustomBlue
-        duration < 666 -> CustomCyan
-        else -> CustomGreen
-    }
-}*/
-
 fun calculateDistance(offset1: Offset, offset2: Offset): Float {
     val deltaX = offset2.x - offset1.x
     val deltaY = offset2.y - offset1.y
@@ -140,6 +105,8 @@ fun onButtonPointerEvent(
 
     getButtonIsMoved: () -> Boolean,
     setButtonIsMoved: (Boolean) -> Unit,
+    getSelectedDuration: () -> DurationLevel,
+    getSelectedDPressure: () -> PressureLevel,
     isContained: (Offset) -> Boolean
 ) {
     // https://developer.android.com/reference/kotlin/androidx/compose/ui/input/pointer/PointerInputChange
@@ -167,7 +134,7 @@ fun onButtonPointerEvent(
             val isContained = isContained(position)
             Log.d(
                 "onButtonPointerEvent",
-                "\t$pressure\t$duration\t$distance\t$isContained"
+                "\t${getSelectedDuration()}\t${getSelectedDPressure()}\t$pressure\t$duration\t$distance\t$isContained"
             )
             setButtonIsMoved(false)
         }
@@ -179,7 +146,7 @@ fun onButtonPointerEvent(
         else -> {
             Log.d(
                 "onButtonPointerEvent",
-                "\t$type\t${position.x}\t${position.y}\t$uptime\t$pressure\t$isMoved"
+                "\t${getSelectedDuration()}\t${getSelectedDPressure()}\t$type\t${position.x}\t${position.y}\t$uptime\t$pressure\t$isMoved"
             )
         }
     }
@@ -196,7 +163,6 @@ fun PressureSelector(
     initialSelection: PressureLevel,
     onOptionSelected: (PressureLevel) -> Unit
 ) {
-    //val pressureOptions = listOf(PressureLevel.LIGHT, PressureLevel.AVG, PressureLevel.FIRM)
     val (selectedOption, onOptionChange) = remember { mutableStateOf(initialSelection) }
     LaunchedEffect(selectedOption) {
         if (selectedOption != initialSelection) {
@@ -204,8 +170,6 @@ fun PressureSelector(
         }
     }
     Column(
-        // modifier = Modifier
-        //  .fillMaxWidth()
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -217,11 +181,9 @@ fun PressureSelector(
                 text = "Pressure",
                 fontSize = 20.sp,
             )
-            //pressureOptions.forEach { pressure ->
             PressureLevel.entries.forEach { pressure ->
                 Row(
                     Modifier
-                        //  .fillMaxWidth()
                         .selectable(
                             selected = (pressure == selectedOption),
                             onClick = { onOptionChange(pressure) },
@@ -232,7 +194,6 @@ fun PressureSelector(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val initialRadioButtonColor = MaterialTheme.colorScheme.tertiary
-                    //      val initialRadioButtonBackgroundColor = MaterialTheme.colorScheme.onTertiary
                     RadioButton(
                         selected = (pressure == selectedOption),
                         onClick = {
@@ -269,7 +230,6 @@ fun DurationSelector(
     initialSelection: DurationLevel,
     onOptionSelected: (DurationLevel) -> Unit
 ) {
-    //val durationOptions = listOf(DurationLevel.SHORT, DurationLevel.TAP, DurationLevel.LONG)
     val (selectedOption, onOptionChange) = remember { mutableStateOf(initialSelection) }
     LaunchedEffect(selectedOption) {
         if (selectedOption != initialSelection) {
@@ -277,8 +237,6 @@ fun DurationSelector(
         }
     }
     Column(
-        // modifier = Modifier
-        //  .fillMaxWidth()
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
     ) {
@@ -290,11 +248,9 @@ fun DurationSelector(
                 text = "Duration",
                 fontSize = 20.sp,
             )
-            //durationOptions.forEach { duration ->
             DurationLevel.entries.forEach { duration ->
                 Row(
                     Modifier
-                        //  .fillMaxWidth()
                         .selectable(
                             selected = (duration == selectedOption),
                             onClick = { onOptionChange(duration) },
@@ -303,9 +259,8 @@ fun DurationSelector(
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
-                ) {//val initialRadioButtonColor = MaterialTheme.colorScheme.tertiary
+                ) {
                     val initialRadioButtonColor = MaterialTheme.colorScheme.tertiary
-                    // val initialRadioButtonBackgroundColor = MaterialTheme.colorScheme.onTertiary
                     RadioButton(
                         selected = (duration == selectedOption),
                         onClick = {
@@ -361,16 +316,17 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
     val pressureButtonFontAvgColor = MaterialTheme.colorScheme.onSecondary
     val pressureButtonFontFirmColor = MaterialTheme.colorScheme.onTertiary
     val getPressureButtonColor: () -> Color = {
+        val pressure = buttonPressure
         when {
-            buttonPressure < 0.33f -> pressureButtonLightColor
-            buttonPressure < 0.66f -> pressureButtonAvgColor
+            buttonPressure < 0.30f -> pressureButtonLightColor
+            buttonPressure < 0.50f -> pressureButtonAvgColor
             else -> pressureButtonFirmColor
         }
     }
     val getPressureButtonFontColor: () -> Color = {
         when {
-            buttonPressure < 0.33f -> pressureButtonFontLightColor
-            buttonPressure < 0.66f -> pressureButtonFontAvgColor
+            buttonPressure < 0.30f -> pressureButtonFontLightColor
+            buttonPressure < 0.50f -> pressureButtonFontAvgColor
             else -> pressureButtonFontFirmColor
         }
     }
@@ -393,15 +349,15 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
     val durationButtonFontLongColor = MaterialTheme.colorScheme.onTertiary
     val getDurationButtonColor: () -> Color = {
         when {
-            buttonDuration < 50L -> durationButtonShortColor
-            buttonDuration < 100L -> durationButtonTapColor
+            buttonDuration < 150L -> durationButtonShortColor
+            buttonDuration < 600L -> durationButtonTapColor
             else -> durationButtonLongColor
         }
     }
     val getDurationButtonFontColor: () -> Color = {
         when {
-            buttonDuration < 50L -> durationButtonFontShortColor
-            buttonDuration < 100L -> durationButtonFontTapColor
+            buttonDuration < 150L -> durationButtonFontShortColor
+            buttonDuration < 600L -> durationButtonFontTapColor
             else -> durationButtonFontLongColor
         }
     }
@@ -437,7 +393,9 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
     val setButtonIsMoved: (Boolean) -> Unit =
         { newButtonIsMoved -> buttonIsMoved = newButtonIsMoved }
     var selectedDuration by remember { mutableStateOf(DurationLevel.TAP) }
+    val getSelectedDuration: () -> DurationLevel = { selectedDuration }
     var selectedPressure by remember { mutableStateOf(PressureLevel.AVG) }
+    val getSelectedDPressure: () -> PressureLevel = { selectedPressure }
     var boxCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val isContained: (Offset) -> Boolean =
         { pointToCheck ->
@@ -453,15 +411,13 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
             } ?: false
         }
     Column(
-//  modifier = Modifier.fillMaxSize(), // Makes the Column take the full width
-        horizontalAlignment = Alignment.CenterHorizontally // Centers children horizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(300.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-            //   .fillMaxHeight(),
         ) {
             Column() {
                 PressureSelector(
@@ -491,7 +447,7 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
                         300.dp
                     )
                     .clip(RoundedCornerShape(31.dp))
-                    .background(buttonBackgroundColor)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .onGloballyPositioned { coordinates ->
                         boxCoordinates = coordinates
                     }
@@ -523,6 +479,8 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
                                     getDistanceButtonFontColor,
                                     getButtonIsMoved,
                                     setButtonIsMoved,
+                                    getSelectedDuration,
+                                    getSelectedDPressure,
                                     isContained
                                 )
                             }
@@ -539,7 +497,6 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
                     ) {
                         Text(
                             text = "pressure: $selectedPressure",
-                            //color = getPressureButtonFontColor(),
                             fontSize = 24.sp
                         )
                     }
@@ -552,7 +509,6 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
                     ) {
                         Text(
                             text = "duration: $selectedDuration",
-//                            color = getDurationButtonFontColor(),
                             fontSize = 24.sp
                         )
                     }
@@ -563,9 +519,10 @@ fun EventBox(name: String, modifier: Modifier = Modifier) {
                             contentColor = getDistanceButtonFontColor()
                         ),
                     ) {
+                        val distance = getButtonDistance().toInt()
+                        val distanceString = String.format("%5d", distance)
                         Text(
-                            text = "distance: ${getButtonDistance()}",
-//                            color = getDistanceButtonFontColor(),
+                            text = "distance: ${distanceString}",
                             fontSize = 24.sp
                         )
                     }
