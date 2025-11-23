@@ -10,6 +10,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.example.eventtest.ui.theme.EventTestTheme
 
+/**
+ * Main activity for the Event Test application.
+ * Displays an interactive UI for testing pointer events including pressure, duration, and distance.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
