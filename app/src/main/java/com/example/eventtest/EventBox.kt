@@ -30,12 +30,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
 @Composable
 fun EventBox(modifier: Modifier = Modifier) {
+    // https://developer.android.com/reference/android/view/ViewConfiguration
+    // https://gemini.google.com/share/e3a0e858ec87
+    val longPressTimeout = LocalViewConfiguration.current.longPressTimeoutMillis
+    val tapTimeout = LocalViewConfiguration.current.doubleTapTimeoutMillis
+
     var count by remember { mutableIntStateOf(0) }
     val getCounter: () -> Int = { count++ }
 
@@ -95,15 +101,15 @@ fun EventBox(modifier: Modifier = Modifier) {
     val durationButtonFontLongColor = buttonFontMaxColor
     val getDurationButtonColor: () -> Color = {
         when {
-            buttonDuration < 150L -> durationButtonShortColor
-            buttonDuration < 600L -> durationButtonTapColor
+            buttonDuration < tapTimeout -> durationButtonShortColor
+            buttonDuration < longPressTimeout -> durationButtonTapColor
             else -> durationButtonLongColor
         }
     }
     val getDurationButtonFontColor: () -> Color = {
         when {
-            buttonDuration < 150L -> durationButtonFontShortColor
-            buttonDuration < 600L -> durationButtonFontTapColor
+            buttonDuration < tapTimeout -> durationButtonFontShortColor
+            buttonDuration < longPressTimeout -> durationButtonFontTapColor
             else -> durationButtonFontLongColor
         }
     }
