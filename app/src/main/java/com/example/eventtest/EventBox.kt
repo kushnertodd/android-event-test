@@ -1,6 +1,7 @@
 package com.example.eventtest
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -72,6 +73,7 @@ fun EventBox(modifier: Modifier = Modifier) {
     // Color scheme
     val colorScheme = MaterialTheme.colorScheme
     val buttonBackColor = colorScheme.background
+    val buttonBorderColor = colorScheme.onBackground
     val buttonMinColor = colorScheme.surface
     val buttonMedColor = colorScheme.primary
     val buttonMaxColor = colorScheme.tertiary
@@ -159,6 +161,11 @@ fun EventBox(modifier: Modifier = Modifier) {
                     .size(BOX_SIZE, BOX_SIZE)
                     .clip(RoundedCornerShape(BOX_CORNER_RADIUS))
                     .background(buttonBackColor)
+                    .border(
+                        width = 2.dp, // Border thickness
+                        color = buttonBorderColor, // Border color
+                        shape = RoundedCornerShape(8.dp) // Optional: Border shape (e.g., rounded corners)
+                    )
                     .onGloballyPositioned { boxCoordinates = it }
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
